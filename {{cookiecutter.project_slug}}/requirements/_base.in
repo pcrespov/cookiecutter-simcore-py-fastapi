@@ -1,0 +1,14 @@
+#
+# Specifies third-party dependencies for 'services/{{ cookiecutter.project_slug }}/src'
+#
+# NOTE: ALL version constraints MUST be commented
+
+aiohttp
+{%- if cookiecutter.enable_aiohttp_swagger == 'true' %}
+aiohttp-swagger
+{%- endif %}
+trafaret
+trafaret-config
+tenacity
+
+-e git+https://github.com/ITISFoundation/osparc-simcore.git@master#egg=servicelib\&subdirectory=packages/service-library

@@ -1,0 +1,12 @@
+cookiecutter
+
+# linter
+pylint
+
+# testing
+pytest
+pytest-cookies
+
+# package management
+yolk3k              # obtains info about installed packages or available in PyPi
+semantic_version    # check compatibility versioning
