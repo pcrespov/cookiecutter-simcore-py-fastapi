@@ -1,69 +1,76 @@
 #!/bin/sh
 #
-INFO="INFO: [`basename "$0"`] "
-ERROR="ERROR: [`basename "$0"`] "
-
-# This entrypoint script:
-#
 # - Executes *inside* of the container upon start as --user [default root]
 # - Notice that the container *starts* as --user [default root] but
 #   *runs* as non-root user [scu]
 #
-echo $INFO "Entrypoint for stage ${SC_BUILD_TARGET} ..."
-echo "  User    :`id $(whoami)`"
-echo "  Workdir :`pwd`"
+set -o errexit
+set -o nounset
+
+IFS=$(printf '\n\t')
+
+INFO="INFO: [$(basename "$0")] "
+WARNING="WARNING: [$(basename "$0")] "
+ERROR="ERROR: [$(basename "$0")] "
+
+echo "$INFO" "Entrypoint for stage ${SC_BUILD_TARGET} ..."
+echo "$INFO" "User :$(id "$(whoami)")"
+echo "$INFO" "Workdir : $(pwd)"
+echo "$INFO" "User : $(id scu)"
+echo "$INFO" "python : $(command -v python)"
+echo "$INFO" "pip : $(command -v pip)"
 
 
-if [[ ${SC_BUILD_TARGET} == "development" ]]
-then
-    # NOTE: expects docker run ... -v $(pwd):/devel/services/{{ cookiecutter.project_slug }}
-    DEVEL_MOUNT=/devel/services/{{ cookiecutter.project_slug }}
+#
+# DEVELOPMENT MODE 
+# - expects docker run ... -v $(pwd):$SC_DEVEL_MOUNT
+# - mounts source folders
+# - deduces host's uid/gip and assigns to user within docker
+#
+if [ "${SC_BUILD_TARGET}" = "development" ]; then
+  echo "$INFO" "development mode detected..."
+  stat "${SC_DEVEL_MOUNT}" >/dev/null 2>&1 ||
+    (echo "$ERROR" "You must mount '$SC_DEVEL_MOUNT' to deduce user and group ids" && exit 1)
 
-    stat $DEVEL_MOUNT &> /dev/null || \
-        (echo $ERROR ": You must mount '$DEVEL_MOUNT' to deduce user and group ids" && exit 1) # FIXME: exit does not stop script
-
-    USERID=$(stat -c %u $DEVEL_MOUNT)
-    GROUPID=$(stat -c %g $DEVEL_MOUNT)
-    GROUPNAME=$(getent group ${GROUPID} | cut -d: -f1)
-
-    if [[ $USERID -eq 0 ]]
-    then
-        addgroup scu root
+  echo "$INFO" "setting correct user id/group id..."
+  HOST_USERID=$(stat --format=%u "${SC_DEVEL_MOUNT}")
+  HOST_GROUPID=$(stat --format=%g "${SC_DEVEL_MOUNT}")
+  CONT_GROUPNAME=$(getent group "${HOST_GROUPID}" | cut --delimiter=: --fields=1)
+  if [ "$HOST_USERID" -eq 0 ]; then
+    echo "$WARNING" "Folder mounted owned by root user... adding $SC_USER_NAME to root..."
+    adduser "$SC_USER_NAME" root
+  else
+    echo "$INFO" "Folder mounted owned by user $HOST_USERID:$HOST_GROUPID-'$CONT_GROUPNAME'..."
+    # take host's credentials in $SC_USER_NAME
+    if [ -z "$CONT_GROUPNAME" ]; then
+      echo "$WARNING" "Creating new group grp$SC_USER_NAME"
+      CONT_GROUPNAME=grp$SC_USER_NAME
+      addgroup --gid "$HOST_GROUPID" "$CONT_GROUPNAME"
     else
-        # take host's credentials in myu
-        if [[ -z "$GROUPNAME" ]]
-        then
-            GROUPNAME=myu
-            addgroup -g $GROUPID $GROUPNAME
-        else
-            addgroup scu $GROUPNAME
-        fi
-
-        deluser scu &> /dev/null
-        adduser -u $USERID -G $GROUPNAME -D -s /bin/sh scu
+      echo "$INFO" "group already exists"
     fi
+    echo "$INFO" "Adding $SC_USER_NAME to group $CONT_GROUPNAME..."
+    adduser "$SC_USER_NAME" "$CONT_GROUPNAME"
+
+    echo "$WARNING" "Changing ownership [this could take some time]"
+    echo "$INFO" "Changing $SC_USER_NAME:$SC_USER_NAME ($SC_USER_ID:$SC_USER_ID) to $SC_USER_NAME:$CONT_GROUPNAME ($HOST_USERID:$HOST_GROUPID)"
+    usermod --uid "$HOST_USERID" --gid "$HOST_GROUPID" "$SC_USER_NAME"
+
+    echo "$INFO" "Changing group properties of files around from $SC_USER_ID to group $CONT_GROUPNAME"
+    find / -path /proc -prune -o -group "$SC_USER_ID" -exec chgrp --no-dereference "$CONT_GROUPNAME" {} \;
+    # change user property of files already around
+    echo "$INFO" "Changing ownership properties of files around from $SC_USER_ID to group $CONT_GROUPNAME"
+    find / -path /proc -prune -o -user "$SC_USER_ID" -exec chown --no-dereference "$SC_USER_NAME" {} \;
+  fi
 fi
 
-
-{# TODO: Add option to add access to docker sockets or not #}
-# Appends docker group if socket is mounted
-DOCKER_MOUNT=/var/run/docker.sock
-
-stat $DOCKER_MOUNT &> /dev/null
-if [[ $? -eq 0 ]]
-then
-    GROUPID=$(stat -c %g $DOCKER_MOUNT)
-    {# sometimes the group docker already exists for some reason, so let's create one that has less chances of existing  #}
-    GROUPNAME=scdocker
-
-    addgroup -g $GROUPID $GROUPNAME &> /dev/null
-    if [[ $? -gt 0 ]]
-    then
-        # if group already exists in container, then reuse name
-        GROUPNAME=$(getent group ${GROUPID} | cut -d: -f1)
-    fi
-    addgroup scu $GROUPNAME
+if [ "${SC_BOOT_MODE}" = "debug-ptvsd" ]; then
+  # NOTE: production does NOT pre-installs ptvsd
+  pip install --no-cache-dir ptvsd
 fi
 
-echo $INFO "Starting boot ..."
-su-exec scu "$@"
+echo "$INFO Starting $* ..."
+echo "  $SC_USER_NAME rights    : $(id "$SC_USER_NAME")"
+echo "  local dir : $(ls -al)"
+
+exec gosu "$SC_USER_NAME" "$@"

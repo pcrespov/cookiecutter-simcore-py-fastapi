@@ -1,4 +1,6 @@
-FROM python:3.6-alpine as base
+ARG PYTHON_VERSION="3.6.10"
+FROM python:${PYTHON_VERSION}-slim-buster as base
+
 #
 #  USAGE:
 #     cd sercices/{{ cookiecutter.project_slug }}
@@ -9,53 +11,70 @@ FROM python:3.6-alpine as base
 
 LABEL maintainer={{ cookiecutter.github_username }}
 
+RUN set -eux; \
+      apt-get update; \
+      apt-get install -y gosu; \
+      rm -rf /var/lib/apt/lists/*; \
+      # verify that the binary works
+      gosu nobody true
+
 # simcore-user uid=8004(scu) gid=8004(scu) groups=8004(scu)
-RUN adduser -D -u 8004 -s /bin/sh -h /home/scu scu
+ENV SC_USER_ID=8004 \
+      SC_USER_NAME=scu \
+      SC_BUILD_TARGET=base \
+      SC_BOOT_MODE=default
 
-RUN apk add --no-cache \
-      su-exec
+RUN adduser \
+      --uid ${SC_USER_ID} \
+      --disabled-password \
+      --gecos "" \
+      --shell /bin/sh \
+      --home /home/${SC_USER_NAME} \
+      ${SC_USER_NAME}
 
-ENV PATH "/home/scu/.local/bin:$PATH"
 
-# All SC_ variables are customized
-ENV SC_PIP pip3 --no-cache-dir
-ENV SC_BUILD_TARGET base
+# Sets utf-8 encoding for Python et al
+ENV LANG=C.UTF-8
 
-EXPOSE 8080
+# Turns off writing .pyc files; superfluous on an ephemeral container.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+      VIRTUAL_ENV=/home/scu/.venv
 
+# Ensures that the python and pip executables used in the image will be
+# those from our virtualenv.
+ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
+
+EXPOSE 8000
+EXPOSE 3000
 
 # -------------------------- Build stage -------------------
 # Installs build/package management tools and third party dependencies
 #
 # + /build             WORKDIR
 #
-{# SEE https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management #}
-{#  SEE https://pip.pypa.io/en/stable/reference/pip_install              #}
 FROM base as build
 
-ENV SC_BUILD_TARGET build
+ENV SC_BUILD_TARGET=build
 
-{# TODO: install and uninstall lists #}
-RUN apk add --no-cache \
-      postgresql-dev \  {# NOTE: postgres sdk #}
-      libc-dev \        {# NOTE: ujson, uvloop # }
-      libffi-dev \
-      gcc \
-      git
+RUN apt-get update &&\
+      apt-get install -y --no-install-recommends \
+      build-essential
 
-RUN $SC_PIP install --upgrade \
-      pip \
+# NOTE: python virtualenv is used here such that installed
+# packages may be moved to production image easily by copying the venv
+RUN python -m venv ${VIRTUAL_ENV}
+
+RUN pip install --upgrade --no-cache-dir \
+      pip~=20.1.1  \
       wheel \
       setuptools
 
 WORKDIR /build
 
 # install base 3rd party dependencies
-COPY  services/{{ cookiecutter.project_slug }}/requirements/*.txt \
-      services/{{ cookiecutter.project_slug }}/requirements/
-
-RUN $SC_PIP install \
-      -r services/{{ cookiecutter.project_slug }}/requirements/_base.txt
+# NOTE: copies to /build to avoid overwriting later which would invalidate this layer
+COPY  --chown=scu:scu services/{{ cookiecutter.project_slug }}/requirements/_base.txt .
+RUN pip --no-cache-dir install -r _base.txt
 
 
 # --------------------------Cache stage -------------------
@@ -68,15 +87,13 @@ FROM build as cache
 
 ENV SC_BUILD_TARGET cache
 
-{# TODO: Consider .dockerignore filter to avoid #}
 COPY --chown=scu:scu packages /build/packages
 COPY --chown=scu:scu services/{{ cookiecutter.project_slug }} /build/services/{{ cookiecutter.project_slug }}
 
 WORKDIR /build/services/{{ cookiecutter.project_slug }}
 
-{# NOTE: notice that tests are not installed within the docker. Currently pytest runs in the host #}
-RUN $SC_PIP install . &&\
-    $SC_PIP list -v
+RUN pip3 --no-cache-dir install -r requirements/prod.txt &&\
+      pip3 --no-cache-dir list -v
 
 
 # --------------------------Production stage -------------------
@@ -86,29 +103,28 @@ RUN $SC_PIP install . &&\
 #  + /home/scu     $HOME = WORKDIR
 #    + services/{{ cookiecutter.project_slug }} [scu:scu]
 #
-FROM cache as production
+FROM base as production
 
-ENV SC_BUILD_TARGET production
-ENV SC_BOOT_MODE production
+ENV SC_BUILD_TARGET=production \
+      SC_BOOT_MODE=production
+
+ENV PYTHONOPTIMIZE=TRUE
 
 WORKDIR /home/scu
 
-RUN mkdir -p services/{{ cookiecutter.project_slug }} &&\
-    chown scu:scu services/{{ cookiecutter.project_slug }} &&\
-    mv /build/services/{{ cookiecutter.project_slug }}/docker services/{{ cookiecutter.project_slug }}/docker &&\
-    rm -rf /build
+# Starting from clean base image, copies pre-installed virtualenv from cache
+COPY --chown=scu:scu --from=cache  ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-{# TODO: optimize size by uninstalling dev tools? https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management#Remove_a_Package   #}
-RUN apk del --no-cache\
-      gcc \
-      git
+# Copies booting scripts
+COPY --chown=scu:scu services/{{ cookiecutter.project_slug }}/docker services/{{ cookiecutter.project_slug }}/docker
+RUN chmod +x services/{{ cookiecutter.project_slug }}/docker/*.sh
 
-{# Shall guarantee maximum startup time limit per service. See https://12factor.net/ #}
+
 HEALTHCHECK --interval=30s \
-            --timeout=20s \
-            --start-period=30s \
-            --retries=3 \
-            CMD ["python3", "services/{{ cookiecutter.project_slug }}/docker/healthcheck.py", "http://localhost:8080/{{ cookiecutter.openapi_specs_version }}/"]
+      --timeout=20s \
+      --start-period=30s \
+      --retries=3 \
+      CMD ["python3", "services/{{ cookiecutter.project_slug }}/docker/healthcheck.py", "http://localhost:8000/"]
 
 ENTRYPOINT [ "/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/entrypoint.sh" ]
 CMD ["/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/boot.sh"]
@@ -124,18 +140,12 @@ CMD ["/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/boot.sh"]
 #
 FROM build as development
 
-ENV SC_BUILD_TARGET development
-ENV SC_BOOT_MODE development
-
-{# TODO: Now could be moved after build to speed up ... or keep it here to enforce developer to build at least once. Reuses build-stage data #}
-{# TODO: consider installing tooling in a separate virtualenv? #}
-{# TODO: really necesary??? #}
-WORKDIR /build
-{# RUN $SC_PIP install -r services/{{ cookiecutter.project_slug }}/requirements/_ci.txt #}
+ENV SC_BUILD_TARGET=development \
+      SC_DEVEL_MOUNT=/devel/services/{{ cookiecutter.project_slug }}
 
 WORKDIR /devel
-VOLUME  /devel/packages
-VOLUME  /devel/services/{{ cookiecutter.project_slug }}/
+
+RUN chown -R scu:scu ${VIRTUAL_ENV}
 
 ENTRYPOINT ["/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/entrypoint.sh"]
 CMD ["/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/boot.sh"]

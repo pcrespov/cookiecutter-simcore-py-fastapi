@@ -8,7 +8,7 @@ Example of usage in a Dockerfile
                 --timeout=30s \
                 --start-period=1s \
                 --retries=3 \
-                CMD python3 docker/healthcheck.py http://localhost:8080/v0/
+                CMD python3 docker/healthcheck.py http://localhost:8000/
 ```
 
 Q&A:
@@ -18,19 +18,23 @@ Q&A:
 
 import os
 import sys
-
 from urllib.request import urlopen
 
 SUCCESS, UNHEALTHY = 0, 1
 
-# Disabled if boots with debugger
-ok = os.environ.get("SC_BOOT_MODE").lower() == "debug"
+# Disabled if boots with debugger (e.g. debug, pdb-debug, debug-ptvsd, etc)
+ok = "debug" in os.environ.get("SC_BOOT_MODE").lower()
 
 # Queries host
-ok = ok or urlopen("{host}{baseurl}".format(
-        host=sys.argv[1],
-        baseurl=os.environ.get("SIMCORE_NODE_BASEPATH", "")) # adds a base-path if defined in environ
-        ).getcode() == 200
+ok = (
+    ok
+    or urlopen(
+        "{host}{baseurl}".format(
+            host=sys.argv[1], baseurl=os.environ.get("SIMCORE_NODE_BASEPATH", "")
+        )  # adds a base-path if defined in environ
+    ).getcode()
+    == 200
+)
 
 
 sys.exit(SUCCESS if ok else UNHEALTHY)
