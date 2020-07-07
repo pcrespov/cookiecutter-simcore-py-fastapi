@@ -2,13 +2,18 @@
 # Specifies third-party dependencies for 'services/{{ cookiecutter.project_slug }}/src'
 #
 # NOTE: ALL version constraints MUST be commented
+-r ../../../packages/postgres-database/requirements/_base.in
 
-aiohttp
-{%- if cookiecutter.enable_aiohttp_swagger == 'true' %}
-aiohttp-swagger
-{%- endif %}
-trafaret
-trafaret-config
+# fastapi and extensions
+fastapi[all]
+async-exit-stack  # not needed when python>=3.7
+async-generator   # not needed when python>=3.7
+
+# data models
+pydantic[dotenv]
+
+# database
+aiopg[sa]
+
+# other
 tenacity
-
--e git+https://github.com/ITISFoundation/osparc-simcore.git@master#egg=servicelib\&subdirectory=packages/service-library
