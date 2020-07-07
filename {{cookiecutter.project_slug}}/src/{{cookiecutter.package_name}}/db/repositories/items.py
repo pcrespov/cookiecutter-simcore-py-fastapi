@@ -2,6 +2,9 @@
 #  reusable functions to interact with the data in the database.
 from . import db
 from . import orm, schemas
+from typing import List
+from ._base import BaseRepository
+
 
 
 async def get_user(conn: db.SAConnection, user_id: int):
@@ -40,25 +43,26 @@ async def create_user(conn: db.SAConnection, user: schemas.UserCreate):
     return orm.User(**row) if row else None
 
 
-async def get_items(conn: db.SAConnection, skip: int = 0, limit: int = 100):
-    #return db.query(orm.Item).offset(skip).limit(limit).all()
-    rows: List[db.RowProxy] = []
-    async for row in conn.execute(orm.items.select()):
-        rows.append(row)
-        if len(rows) >= limit:
-            break
-    return [orm.Item(**r) for r in rows]
+class ItemsRepository(BaseRepository):
+    async def get_items(self, skip: int = 0, limit: int = 100):
+        #return db.query(orm.Item).offset(skip).limit(limit).all()
+        rows: List[db.RowProxy] = []
+        async for row in self.connection.execute(orm.items.select()):
+            rows.append(row)
+            if len(rows) >= limit:
+                break
+        return [orm.Item(**r) for r in rows]
 
 
-async def create_user_item(conn: db.SAConnection, item: schemas.ItemCreate, user_id: int):
-    q = orm.items.insert().values(**item.dict(), owner_id=user_id)
-    await conn.execute(q)
-    # TODO: more efficient way of doing this?
-    row: db.RowProxy = await(await conn.execute(orm.items.select())).first()
-    return orm.Item(**row)
+    async def create_user_item(self, item: schemas.ItemCreate, user_id: int):
+        q = orm.items.insert().values(**item.dict(), owner_id=user_id)
+        await self.connection.execute(q)
+        # TODO: more efficient way of doing this?
+        row: db.RowProxy = await(await self.connection.execute(orm.items.select())).first()
+        return orm.Item(**row)
 
-    #db_item = orm.Item()
-    #db.add(db_item)
-    #db.commit()
-    #db.refresh(db_item)
-    #return db_item
+        #db_item = orm.Item()
+        #db.add(db_item)
+        #db.commit()
+        #db.refresh(db_item)
+        #return db_item

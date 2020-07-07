@@ -1,15 +1,35 @@
 """ Main application entry point
 
- `python -m {{cookiecutter.package_name}} ...`
+ `python -m simcore_service_catalog ...`
 
-Why does this file exist, and why __main__? For more info, read:
-
-- https://www.python.org/dev/peps/pep-0338/
-- https://docs.python.org/3/using/cmdline.html#cmdoption-m
 """
 import sys
+from pathlib import Path
 
-from {{cookiecutter.package_name}}.cli import main
+import uvicorn
+from fastapi import FastAPI
+
+from simcore_service_catalog.core.application import init_app
+from simcore_service_catalog.core.settings import AppSettings, BootModeEnum
+
+current_dir = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
+
+
+# SINGLETON FastAPI app
+the_app: FastAPI = init_app()
+
+
+def main():
+    cfg: AppSettings = the_app.state.settings
+    uvicorn.run(
+        "simcore_service_catalog.__main__:the_app",
+        host=cfg.host,
+        port=cfg.port,
+        reload=cfg.boot_mode == BootModeEnum.development,
+        reload_dirs=[current_dir,],
+        log_level=cfg.log_level_name.lower(),
+    )
+
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
