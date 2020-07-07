@@ -54,5 +54,5 @@ async def shutdown_db():
 
 
 
-## DEBUG: uvicorn simcore_service_components_catalog.main:app --reload
+## DEBUG: uvicorn simcore_service_components_{{ cookiecutter.project_slug }}.main:app --reload
 # TODO: use entry-point to call uvicorn's entrypoint above
