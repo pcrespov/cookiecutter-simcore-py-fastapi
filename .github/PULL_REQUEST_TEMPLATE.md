@@ -19,4 +19,4 @@
 
 - [ ] Documentation reflects the changes
 - [ ] Unit tests for the changes exist
-- [ ] Increased version (see ``make help``) ?
+- [ ] Did the resulting code changed? Increase version (see ``make help``) ?
