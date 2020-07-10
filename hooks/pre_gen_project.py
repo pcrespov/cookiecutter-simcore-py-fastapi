@@ -1,5 +1,7 @@
+import os
+from pathlib import Path
 
-module_name = '{{ cookiecutter.project_slug}}'
+work_dir = Path(os.getcwd()).resolve()
+module_name = "{{ cookiecutter.project_slug }}"
 
-# TODO: add here some
-# print('About to implement %s-------------', module_name)
+print(f"Buidling {module_name} in '{work_dir}' ...")

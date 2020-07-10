@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import subprocess
 from pathlib import Path
-
 
 # When the hook scripts script are run, their current working directory is the root of the generated project
 project_dir = Path(os.getcwd()).resolve()
@@ -62,5 +62,10 @@ def format_title_in_readme():
         )
 
 
+
 if __name__ == "__main__":
+    print("formatting README title")
     format_title_in_readme()
+
+    print("Running black")
+    subprocess.run("black .".split(), cwd=project_dir, check=True)
