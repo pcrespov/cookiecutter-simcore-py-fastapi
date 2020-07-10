@@ -8,7 +8,8 @@
     ".env*": "ini",
     "Dockerfile*": "dockerfile",
     "**/requirements/*.txt": "pip-requirements",
-    "**/requirements/*.in": "pip-requirements"
+    "**/requirements/*.in": "pip-requirements",
+    "*Makefile": "makefile"
   },
   "files.eol": "\n",
   "files.insertFinalNewline": true,
@@ -26,10 +27,7 @@
   "[makefile]": {
     "editor.insertSpaces": false
   },
-  "python.testing.unittestEnabled": false,
-  "python.testing.nosetestsEnabled": false,
   "python.testing.pyTestEnabled": true,
-  "python.pythonPath": ".venv/bin/python",
-  "restructuredtext.confPath": "",
-  "autoDocstring.docstringFormat": "sphinx"
+  "autoDocstring.docstringFormat": "sphinx",
+  "python.formatting.provider": "black"
 }

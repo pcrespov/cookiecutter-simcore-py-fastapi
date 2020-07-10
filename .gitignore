@@ -127,4 +127,4 @@ tmp/
 .tmp*
 
 # vscode configuration
-.vsode/settings.json
+.vscode/settings.json
