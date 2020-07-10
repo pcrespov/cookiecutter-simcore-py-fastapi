@@ -29,7 +29,7 @@ def download_latest_simcore_at(simcore_folder: Path):
         subprocess.run("git checkout master".split(), cwd=simcore_folder, check=True)
     else:
         subprocess.run(
-            f"git clone --depth=1 https://github.com/ITISFoundation/osparc-simcore {simcore_folder.name}".split(),
+            f"git clone --depth 1 https://github.com/ITISFoundation/osparc-simcore {simcore_folder.name}".split(),
             cwd=simcore_folder.parent,
             check=True,
         )

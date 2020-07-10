@@ -64,8 +64,8 @@ def format_title_in_readme():
 
 
 if __name__ == "__main__":
-    print("formatting README title")
+    print("[POST] Formatting README title ...")
     format_title_in_readme()
 
-    print("Running black")
+    print("[POST] Running black")
     subprocess.run("black .".split(), cwd=project_dir, check=True)
