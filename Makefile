@@ -6,11 +6,12 @@
 # - internal targets shall start with '.'
 # - KISS
 #
-SHELL = /bin/bash
-.DEFAULT_GOAL := help
 
-OUTPUT_DIR = $(CURDIR)/.output
-TEMPLATE = $(CURDIR)
+.DEFAULT_GOAL := help
+SHELL         := /bin/bash
+SIMCORE_DIR   := $(CURDIR)/.output/osparc-simcore
+OUTPUT_DIR    := $(SIMCORE_DIR)/services
+TEMPLATE      := $(CURDIR)
 
 #-----------------------------------
 .PHONY: devenv
@@ -49,9 +50,14 @@ tests: ## tests backed cookie
 #-----------------------------------
 .PHONY: play
 
-$(OUTPUT_DIR):
-	# creating $@
-	@mkdir -p $@
+.PHONY: simcore-update
+simcore-update:
+	mkdir -p $(SIMCORE_DIR)
+	# cloning/udpating simcore
+	python3 -c "import tests.utils as tu; tu.download_latest_simcore_at('$(SIMCORE_DIR)')"
+
+$(OUTPUT_DIR): simcore-update
+	
 
 define cookiecutterrc =
 $(shell find $(OUTPUT_DIR) -name ".cookiecutterrc" 2>/dev/null | tail -n 1 )
