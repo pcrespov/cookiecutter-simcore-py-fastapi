@@ -39,11 +39,9 @@ See also [CHANGELOG](CHANGELOG.md).
 
 ## Acknoledgements
 
-This template was built upon ideas/snippets borrowed from already existing great [cookiecutter]s such as [gh:ionelmc/cookiecutter-pylibrary](https://github.com/ionelmc/cookiecutter-pylibrary), [gh:alexkey/cookiecutter-lux-python](https://github.com/alexkey/cookiecutter-lux-python/tree/master/%7B%7B%20cookiecutter.repo_name%20%7D%7D) or [gh:mdklatt/cookiecutter-python-app](https://github.com/mdklatt/cookiecutter-python-app).
+  Many of the ideas in the service design were taken from the **excellent** work at [fastapi-realworld-example-app](https://github.com/nsidnev/fastapi-realworld-example-app) by *Nik Sidnev* using the **extraordinary** [fastapi](https://fastapi.tiangolo.com/) package by *Sebastian Ramirez*.
 
-## License
 
-This project is licensed under the terms of the [MIT License](/LICENSE)
 
 <!-- Links below this line !-->
 [cookiecutter]:https://cookiecutter.readthedocs.io
