@@ -4,7 +4,6 @@
 
 <!-- Please give a short brief about these changes. -->
 
-
 ## Related issue number
 
 <!-- Please add #issues -->
@@ -17,6 +16,6 @@
 
 ## Checklist
 
-- [ ] Documentation reflects the changes
 - [ ] Unit tests for the changes exist
-- [ ] Did the resulting code changed? Increase version (see ``make help``) ?
+- [ ] Modify CHANGELOG
+- [ ] Increase VERSION
