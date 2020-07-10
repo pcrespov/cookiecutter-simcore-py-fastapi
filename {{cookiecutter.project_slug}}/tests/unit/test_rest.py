@@ -11,7 +11,7 @@ from {{ cookiecutter.package_name }}.application_config import APP_CONFIG_KEY
 from {{ cookiecutter.package_name }} import __version__
 
 major_version = __version__.split('.')[0]
-API_VERSION = f"v{major_version}""
+API_VERSION = f"v{major_version}"
 
 
 @pytest.fixture
