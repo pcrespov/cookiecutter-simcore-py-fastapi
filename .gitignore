@@ -126,5 +126,6 @@ tmp/
 *ignore*
 .tmp*
 
-# vscode configuration
-.vscode/settings.json
+# vscode configuration except templates
+.vscode/*
+!.vscode/*-template.json
