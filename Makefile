@@ -57,7 +57,7 @@ simcore-update:
 	python3 -c "import tests.utils as tu; tu.download_latest_simcore_at('$(SIMCORE_DIR)')"
 
 $(OUTPUT_DIR): simcore-update
-	
+
 
 define cookiecutterrc =
 $(shell find $(OUTPUT_DIR) -name ".cookiecutterrc" 2>/dev/null | tail -n 1 )
