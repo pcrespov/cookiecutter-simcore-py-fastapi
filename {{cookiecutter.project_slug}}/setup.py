@@ -20,7 +20,7 @@ readme = (current_dir/'README.md').read_text()
 version = (current_dir/"VERSION").read_text().strip()
 
 install_requirements = read_reqs( current_dir / "requirements" / "_base.txt" ) + [
-    'simcore-service-library~=0.1'
+    'simcore-postgres-database'
 ]
 
 test_requirements = read_reqs( current_dir / "requirements" / "_test.txt" )
@@ -44,12 +44,6 @@ setup(
     package_dir={
         '': 'src',
     },
-    package_data={
-        '': [
-            'config/*.yaml',
-            ],
-    },
-    include_package_data=True,
     install_requires= install_requirements,
     test_suite='tests',
     tests_require=test_requirements,
