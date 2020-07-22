@@ -1,24 +1,25 @@
 #
-# TODO: use this example as template for CRUD on a resource
+# SAMPLE based on https://cloud.google.com/apis/design
+#
+# Routes for a **collection** of items
 #
 
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, Body, Depends, FastAPI, HTTPException, Query
-from starlette.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
-                              HTTP_409_CONFLICT, HTTP_501_NOT_IMPLEMENTED)
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from starlette.status import (
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_409_CONFLICT,
+    HTTP_501_NOT_IMPLEMENTED,
+)
 
 from ...db.repositories.items import ItemsRepository
-from ...models.schemas.items import ItemOverview, ItemDetailed, ItemCreate, ItemUpdate
+from ...models.schemas.items import ItemCreate, ItemDetailed, ItemOverview, ItemUpdate
 from ..dependencies.database import get_repository
 
 router = APIRouter()
-
-# CRUD operations on items
-
-
-
 
 
 log = logging.getLogger(__name__)
@@ -71,7 +72,8 @@ async def search_items():
 
 @router.get("/{item_id}", response_model=ItemDetailed)
 async def get_item(
-    item_id: int, items_repo: ItemsRepository = Depends(get_repository(ItemsRepository)),
+    item_id: int,
+    items_repo: ItemsRepository = Depends(get_repository(ItemsRepository)),
 ):
     item = await items_repo.get_item(item_id)
     return item
@@ -84,20 +86,20 @@ async def get_item(
     response_description="Successfully created",
 )
 async def create_item(
-    dag: ItemCreate = Body(...),
+    item: ItemCreate = Body(...),
     items_repo: ItemsRepository = Depends(get_repository(ItemsRepository)),
 ):
-    assert dag  # nosec
+    assert item  # nosec
 
-    if dag.version == "0.0.0" and dag.key == "foo":
+    if item.version == "0.0.0" and item.key == "foo":
         # client-assigned resouce name
         raise HTTPException(
             status_code=HTTP_409_CONFLICT,
-            detail=f"DAG {dag.key}:{dag.version} already exists",
+            detail=f"item {item.key}:{item.version} already exists",
         )
 
-    # FIXME: conversion DAG (issue with workbench being json in orm and dict in schema)
-    item_id = await items_repo.create_item(dag)
+    # FIXME: conversion item (issue with workbench being json in orm and dict in schema)
+    item_id = await items_repo.create_item(item)
     # TODO: no need to return since there is not extra info?, perhaps return
     return item_id
 
@@ -105,11 +107,11 @@ async def create_item(
 @router.patch("/{item_id}", response_model=ItemDetailed)
 async def udpate_item(
     item_id: int,
-    dag: ItemUpdate = Body(None),
+    item: ItemUpdate = Body(None),
     items_repo: ItemsRepository = Depends(get_repository(ItemsRepository)),
 ):
     async with items_repo.connection.begin():
-        await items_repo.update_item(item_id, dag)
+        await items_repo.update_item(item_id, item)
         updated_item = await items_repo.get_item(item_id)
 
     return updated_item
@@ -118,10 +120,10 @@ async def udpate_item(
 @router.put("/{item_id}", response_model=Optional[ItemDetailed])
 async def replace_item(
     item_id: int,
-    dag: ItemCreate = Body(...),
+    item: ItemCreate = Body(...),
     items_repo: ItemsRepository = Depends(get_repository(ItemsRepository)),
 ):
-    await items_repo.replace_item(item_id, dag)
+    await items_repo.replace_item(item_id, item)
 
 
 @router.delete(
@@ -130,7 +132,8 @@ async def replace_item(
     response_description="Successfully deleted",
 )
 async def delete_item(
-    item_id: int, items_repo: ItemsRepository = Depends(get_repository(ItemsRepository)),
+    item_id: int,
+    items_repo: ItemsRepository = Depends(get_repository(ItemsRepository)),
 ):
     # If the Delete method immediately removes the resource, it should return an empty response.
     # If the Delete method initiates a long-running operation, it should return the long-running operation.

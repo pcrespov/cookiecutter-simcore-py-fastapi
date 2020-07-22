@@ -1,8 +1,11 @@
 #  reusable functions to interact with the data in the database.
+from typing import List
+
+from aiopg.sa.result import RowProxy
+
 from .. import orm
 from ._base import BaseRepository
-from typing import List
-from aiopg.sa.result import RowProxy
+
 
 class ItemsRepository(BaseRepository):
     async def list_not_detailed(self, skip: int = 0, limit: int = 100):
@@ -27,7 +30,7 @@ class ItemsRepository(BaseRepository):
     #     return orm.Item(**row)
 
     #     # db_item = orm.Item()
-        # db.add(db_item)
-        # db.commit()
-        # db.refresh(db_item)
-        # return db_item
+    # db.add(db_item)
+    # db.commit()
+    # db.refresh(db_item)
+    # return db_item
