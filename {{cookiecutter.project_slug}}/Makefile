@@ -5,7 +5,7 @@ include ../../scripts/common.Makefile
 
 # Custom variables
 APP_NAME         := $(notdir $(CURDIR))
-APP_CLI_NAME     := {{ cookiecutter.project_slug }}
+APP_CLI_NAME     := {{ cookiecutter.command_line_interface_bin_name }}
 APP_PACKAGE_NAME := $(subst -,_,$(APP_CLI_NAME))
 APP_VERSION      := $(shell cat VERSION)
 SRC_DIR          := $(abspath $(CURDIR)/src/$(APP_PACKAGE_NAME))
@@ -28,49 +28,50 @@ tests: tests-unit tests-integration
 
 tests-unit: ## runs unit tests
 	# running unit tests
-	@pytest -vv --exitfirst --failed-first --durations=10 --pdb $(CURDIR)/tests/unit
+	@pytest -vv \
+		--exitfirst \
+		--failed-first \
+		--durations=10 \
+		--pdb \
+		$(CURDIR)/tests/unit
 
 tests-integration: ## runs integration tests against local+production images
 	# running integration tests local/(service):production images ...
 	@export DOCKER_REGISTRY=local; \
 	export DOCKER_IMAGE_TAG=production; \
-	pytest -vv --exitfirst --failed-first --durations=10 --pdb $(CURDIR)/tests/integration
+	pytest -vv \
+		--exitfirst \
+		--failed-first \
+		--durations=10 \
+		--pdb \
+		$(CURDIR)/tests/integration
 
 
 # DEVELOPMENT ########
-
-
 .env:
 	cp .env-devel $@
 
-docker-compose.yml:
-	cp $(CURDIR)/tests/unit/with_dbs/docker-compose.yml $@
+docker-compose-db.ignore.yml: docker-compose-db.yml .env
+	# resolving $@ under environ $<
+	docker-compose -f $< config > $@
 
 
-.PHONY: run-devel down up-pg
 
-up-pg: docker-compose.yml down-pg
-	# starting pg database ...
+.PHONY: up-db down down-db run-devel
+
+up-db: docker-compose-db.ignore.yml down # starts pg stack fixture
+	# starting database stack as defined in  ...
 	docker-compose -f $< up --detach
 
-down-pg: docker-compose.yml ## stops pg fixture
+down down-db: docker-compose-db.ignore.yml ## stops pg stack fixture
 	# stopping extra services
 	-@docker-compose -f $< down
 
-
-run-devel run-prod: .env up-pg ## runs app with pg service
-	# starting service ...
-ifeq ($(subst run-,,$@),devel)
-	# development mode (with reload upon change)
-	# start app (under $<)
+run-devel: .env up-db  ## starts db and start service in host
+	# start app (within $<) in devel mode
 	uvicorn $(APP_PACKAGE_NAME).__main__:the_app \
 		--reload --reload-dir $(SRC_DIR) \
 		--port=8000 --host=0.0.0.0
-else
-	# production mode
-	$(APP_CLI_NAME)
-endif
-	# stop
 
 
 # BUILD #####################

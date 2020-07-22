@@ -64,15 +64,15 @@ $(shell find $(OUTPUT_DIR) -name ".cookiecutterrc" 2>/dev/null | tail -n 1 )
 endef
 
 
-play: $(OUTPUT_DIR) ## runs cookiecutter into output folder
+play: _check_venv_active ## runs cookiecutter into output folder
 ifeq (,$(cookiecutterrc))
 	# baking cookie $(TEMPLATE) onto $<
-	@cookiecutter --output-dir "$<" "$(TEMPLATE)"
+	@cookiecutter --output-dir "$(OUTPUT_DIR)" "$(TEMPLATE)"
 else
 	# replaying cookie-cutter using $(cookiecutterrc)
 	@cookiecutter --no-input -f \
 		--config-file="$(cookiecutterrc)"  \
-		--output-dir="$<" "$(TEMPLATE)"
+		--output-dir="$(OUTPUT_DIR)" "$(TEMPLATE)"
 endif
 	@echo "To see generated code, lauch 'code $(wildcard $(OUTPUT_DIR)/*)'"
 
@@ -117,3 +117,9 @@ clean: ## cleans all unversioned files in project and temp files create by this 
 clean-all: clean ## hard clean including virtual environment
 	# removing .venv
 	-@rm -rf .venv
+
+
+.PHONY: _check_venv_active
+_check_venv_active:
+	# checking whether virtual environment was activated
+	@python3 -c "import sys; assert sys.base_prefix!=sys.prefix"
