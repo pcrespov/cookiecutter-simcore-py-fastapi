@@ -1,10 +1,4 @@
-# TODO: split in InData, OutData
-# TODO: find commons
-# TODO: conversion from/to database's ORM in models.py
-
-from typing import List
-
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ItemBase(BaseModel):
@@ -13,7 +7,7 @@ class ItemBase(BaseModel):
 
 
 class Item(ItemBase):
-    id: int
+    id_: int = Field(..., alias="id")
     owner_id: int
 
     class Config:
