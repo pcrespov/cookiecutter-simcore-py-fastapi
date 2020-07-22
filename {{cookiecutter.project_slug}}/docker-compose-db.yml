@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   postgres:
-    image: postgres:10
+    image: postgres:latest
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-test}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-test}
@@ -20,7 +20,7 @@ services:
         "-c", "log_line_prefix=[%p] [%a] [%c] [%x] "
       ]
   adminer:
-    image: adminer
+    image: adminer:latest
     ports:
       - 18080:8080
     depends_on:
