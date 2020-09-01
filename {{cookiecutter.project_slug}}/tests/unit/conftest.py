@@ -15,7 +15,7 @@ pytest_plugins = ["pytest_simcore.environs"]
 
 @pytest.fixture(scope="session")
 def project_slug_dir(osparc_simcore_root_dir) -> Path:
-    # uses pytest_simcore.environs.osparc_simcore_root_dir
+    # fixtures in pytest_simcore.environs
     service_folder = osparc_simcore_root_dir / "services" / "{{ cookiecutter.project_slug }}"
     assert service_folder.exists()
     assert any(service_folder.glob("src/{{ cookiecutter.package_name }}"))
