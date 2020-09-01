@@ -115,9 +115,9 @@ class AuthSession:
         url = self._url(path)
         try:
             resp = await self.client.get(url, cookies=self.session_cookies)
-        except Exception:
+        except Exception as err:
             logger.exception("Failed to get %s", url)
-            raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE)
+            raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE) from err
 
         return self._process(resp)
 
@@ -125,8 +125,8 @@ class AuthSession:
         url = self._url(path)
         try:
             resp = await self.client.put(url, json=body, cookies=self.session_cookies)
-        except Exception:
+        except Exception as err:
             logger.exception("Failed to put %s", url)
-            raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE)
+            raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE) from err
 
         return self._process(resp)
