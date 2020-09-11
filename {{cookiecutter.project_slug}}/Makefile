@@ -51,36 +51,38 @@ tests-integration: ## runs integration tests against local+production images
 .env:
 	cp .env-devel $@
 
-docker-compose-adjacent.ignore.yml: docker-compose-adjacent.yml .env
+
+
+.PHONY: up-extra down down-extra run-devel
+
+up-extra: .env down ## starts pg stack fixture
 	# resolving $@ under environ $<
-	docker-compose -f $< config > $@
-
-
-
-.PHONY: up-adjacent down down-adjacent run-devel
-
-up-adjacent: docker-compose-adjacent.ignore.yml down # starts pg stack fixture
+	docker-compose -f docker-compose-extra.yml config
 	# starting database stack as defined in  ...
-	docker-compose -f $< up --detach
+	docker-compose -f docker-compose-extra.yml up --detach
 	# discovering postgres services
 	@export $(shell grep -v '^#' .env | xargs) && sc-pg discover
 	@sc-pg info
 	# upgrading postgres database to HEAD version
 	@sc-pg upgrade
 
-down down-adjacent: docker-compose-adjacent.ignore.yml ## stops pg stack fixture
-	# stopping extra services
-	-@docker-compose -f $< down
 
-run-devel: .env up-adjacent  ## runs app with services defined in docker-compose-adjacent.yml
+down down-extra: ## stops pg stack fixture
+	# stopping extra services
+	-@docker-compose -f docker-compose-extra.yml down
+
+
+run-devel: .env up-extra  ## runs app with services defined in docker-compose-extra.yml
 	# start app (within $<) in devel mode with adjacent services
 	uvicorn $(APP_PACKAGE_NAME).__main__:the_app \
 		--reload --reload-dir $(SRC_DIR) \
 		--port=8000 --host=0.0.0.0
 
-run-prod: .env up-adjacent
+
+run-prod: .env up-extra
 	# start app (within $<) in production mode with adjacent services
-	{{ cookiecutter.command_line_interface_bin_name }}
+	$(APP_CLI_NAME)
+
 
 # BUILD #####################
 
