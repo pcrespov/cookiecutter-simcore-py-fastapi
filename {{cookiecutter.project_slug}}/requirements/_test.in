@@ -15,10 +15,10 @@ pytest-aiohttp  # incompatible with pytest-asyncio. See https://github.com/pytes
 pytest-cov
 pytest-mock
 pytest-runner
-pytest-docker
 
 # fixtures
 Faker
+respx
 
 # migration due to pytest_simcore.postgres_service2
 alembic
