@@ -51,28 +51,36 @@ tests-integration: ## runs integration tests against local+production images
 .env:
 	cp .env-devel $@
 
-docker-compose-db.ignore.yml: docker-compose-db.yml .env
+docker-compose-adjacent.ignore.yml: docker-compose-adjacent.yml .env
 	# resolving $@ under environ $<
 	docker-compose -f $< config > $@
 
 
 
-.PHONY: up-db down down-db run-devel
+.PHONY: up-adjacent down down-adjacent run-devel
 
-up-db: docker-compose-db.ignore.yml down # starts pg stack fixture
+up-adjacent: docker-compose-adjacent.ignore.yml down # starts pg stack fixture
 	# starting database stack as defined in  ...
 	docker-compose -f $< up --detach
+	# discovering postgres services
+	@export $(shell grep -v '^#' .env | xargs) && sc-pg discover
+	@sc-pg info
+	# upgrading postgres database to HEAD version
+	@sc-pg upgrade
 
-down down-db: docker-compose-db.ignore.yml ## stops pg stack fixture
+down down-adjacent: docker-compose-adjacent.ignore.yml ## stops pg stack fixture
 	# stopping extra services
 	-@docker-compose -f $< down
 
-run-devel: .env up-db  ## starts db and start service in host
-	# start app (within $<) in devel mode
+run-devel: .env up-adjacent  ## runs app with services defined in docker-compose-adjacent.yml
+	# start app (within $<) in devel mode with adjacent services
 	uvicorn $(APP_PACKAGE_NAME).__main__:the_app \
 		--reload --reload-dir $(SRC_DIR) \
 		--port=8000 --host=0.0.0.0
 
+run-prod: .env up-adjacent
+	# start app (within $<) in production mode with adjacent services
+	{{ cookiecutter.command_line_interface_bin_name }}
 
 # BUILD #####################
 
@@ -83,7 +91,7 @@ build build-nc build-devel build-devel-nc build-cache build-cache-nc: ## docker 
 
 
 .PHONY: openapi-specs openapi.json
-openapi-specs: openapi.json
+openapi-specs: openapi.json .env
 openapi.json:
 	# generating openapi specs file
 	python3 -c "import json; from $(APP_PACKAGE_NAME).__main__ import *; print( json.dumps(the_app.openapi(), indent=2) )" > $@
