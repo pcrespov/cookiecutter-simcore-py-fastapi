@@ -27,7 +27,5 @@
   "[makefile]": {
     "editor.insertSpaces": false
   },
-  "python.testing.pyTestEnabled": true,
-  "autoDocstring.docstringFormat": "sphinx",
   "python.formatting.provider": "black"
 }
