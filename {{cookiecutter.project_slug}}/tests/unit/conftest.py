@@ -9,12 +9,12 @@ import pytest
 
 import {{ cookiecutter.package_name }}
 
-current_dir = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
+
 pytest_plugins = ["pytest_simcore.environs"]
 
 
 @pytest.fixture(scope="session")
-def project_slug_dir(osparc_simcore_root_dir) -> Path:
+def project_slug_dir(osparc_simcore_root_dir: Path) -> Path:
     # fixtures in pytest_simcore.environs
     service_folder = osparc_simcore_root_dir / "services" / "{{ cookiecutter.project_slug }}"
     assert service_folder.exists()

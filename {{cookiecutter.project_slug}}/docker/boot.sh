@@ -11,10 +11,10 @@ echo "$INFO" "User :$(id "$(whoami)")"
 echo "$INFO" "Workdir : $(pwd)"
 
 #
-# DEVELOPMENT MODE 
+# DEVELOPMENT MODE
 #
 # - prints environ info
-# - installs requirements in mounted volume 
+# - installs requirements in mounted volume
 #
 if [ "${SC_BUILD_TARGET}" = "development" ]; then
   echo "$INFO" "Environment :"
@@ -30,15 +30,18 @@ if [ "${SC_BUILD_TARGET}" = "development" ]; then
   pip list | sed 's/^/    /'
 fi
 
-
 #
 # RUNNING application
 #
-if [ "${SC_BOOT_MODE}" = "debug-ptvsd" ]
-then
+if [ "${SC_BOOT_MODE}" = "debug-ptvsd" ]; then
   # NOTE: ptvsd is programmatically enabled inside of the service
   # this way we can have reload in place as well
-  exec uvicorn {{ cookiecutter.package_name }}.__main__:the_app --reload --host 0.0.0.0
+  exec uvicorn {{ cookiecutter.package_name }}.main:the_app \
+    --reload \
+    --host 0.0.0.0 \
+    --reload-dir services/{{ cookiecutter.project_slug }}/src/{{ cookiecutter.package_name }}
 else
-  exec {{ cookiecutter.command_line_interface_bin_name }}
+  exec uvicorn {{ cookiecutter.package_name }}.main:the_app \
+    --host 0.0.0.0 \
+    --reload-dir services/{{ cookiecutter.project_slug }}/src/{{ cookiecutter.package_name }}
 fi
