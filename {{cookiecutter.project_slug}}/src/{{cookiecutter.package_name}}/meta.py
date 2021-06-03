@@ -7,13 +7,12 @@ import pkg_resources
 
 current_distribution = pkg_resources.get_distribution("simcore_service_api_server")
 
-project_name: str = current_distribution.project_name
-
-api_version: str = current_distribution.version
-major, minor, patch = current_distribution.version.split(".")
+__version__ = current_distribution.version
+api_version: str = __version__
+major, minor, patch = __version__.split(".")
 api_vtag: str = f"v{major}"
 
-__version__ = current_distribution.version
+project_name: str = current_distribution.project_name
 
 
 def get_summary() -> str:

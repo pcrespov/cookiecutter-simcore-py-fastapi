@@ -50,9 +50,4 @@ setup(
     extras_require= {
         'test': test_requirements
     },
-    entry_points={
-        'console_scripts': [
-            "{{ cookiecutter.command_line_interface_bin_name }}={{ cookiecutter.package_name }}.__main__:main",
-        ],
-    },
 )
