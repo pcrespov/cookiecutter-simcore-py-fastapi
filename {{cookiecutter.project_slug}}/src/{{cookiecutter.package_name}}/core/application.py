@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import FastAPI
 
 from ..meta import api_version, api_vtag
-from ..api.module_setup import router as api_router
+from ..api.module_setup import setup_api
 
 from .settings import AppSettings
 
@@ -12,7 +12,7 @@ from .settings import AppSettings
 logger = logging.getLogger(__name__)
 
 
-def init_app(settings: Optional[AppSettings] = None) -> FastAPI:
+def create_app(settings: Optional[AppSettings] = None) -> FastAPI:
     if settings is None:
         settings = AppSettings.create_default()
 
@@ -33,11 +33,6 @@ def init_app(settings: Optional[AppSettings] = None) -> FastAPI:
     app.state.settings = settings
 
 
-
-    # app.add_exception_handler(HTTPException, http_error_handler)
-    # app.add_exception_handler(RequestValidationError, http422_error_handler)
-
-    # Routing
-    app.include_router(api_router, prefix=f"/{api_vtag}")
+    setup_api(app)
 
     return app
