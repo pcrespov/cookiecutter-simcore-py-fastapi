@@ -5,7 +5,7 @@ These are the most notable changes in the generated service
 ## [Unreleased]
 
 - minimal setup
--
+
 ## [1.0.0] - 2020-07-10
 
 ### Added

@@ -8,9 +8,6 @@
 
     "package_name": "simcore_service_{{ cookiecutter.project_slug|replace('-','_') }}",
     "distribution_name": "simcore-service-{{ cookiecutter.project_slug }}",
-    "command_line_interface_bin_name": "{{ cookiecutter.distribution_name }}",
-
-    "dockercompose_service_name": "{{ cookiecutter.project_slug }}",
 
     "year": "{% now 'utc', '%Y' %}",
     "version": "0.1.0-alpha",
