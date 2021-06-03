@@ -1,31 +1,24 @@
 #
-# Specifies dependencies required to run 'services/{{ cookiecutter.project_slug }}/test'
-#  both for unit and integration tests!!
+# Specifies dependencies required to run 'services/{{ cookiecutter.project_slug }}/test' both for unit and integration tests!!
 #
+-c ../../../requirements/constraints.txt
 
 # frozen specs
 -r _base.txt
 
-# 'services/{{ cookiecutter.project_slug }}/tests/unit' dependencies
-
 
 # testing
 pytest
-pytest-aiohttp  # incompatible with pytest-asyncio. See https://github.com/pytest-dev/pytest-asyncio/issues/76
-pytest-cov
-pytest-mock
-pytest-runner
 
 # fixtures
-Faker
+faker
 respx
 
-# migration due to pytest_simcore.postgres_service2
-alembic
-docker
-
-# tools
+# linter tool
 pylint
-coveralls
+
+# code coverage
 codecov
-ptvsd
+coverage
+coveralls
+pytest-cov

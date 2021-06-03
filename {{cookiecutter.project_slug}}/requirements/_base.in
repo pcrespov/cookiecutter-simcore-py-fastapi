@@ -2,18 +2,9 @@
 # Specifies third-party dependencies for 'services/{{ cookiecutter.project_slug }}/src'
 #
 # NOTE: ALL version constraints MUST be commented
--r ../../../packages/postgres-database/requirements/_base.in
+-c ../../../requirements/constraints.txt
 
-# fastapi and extensions
-fastapi[all]
-async-exit-stack  # not needed when python>=3.7
-async-generator   # not needed when python>=3.7
+fastapi
+uvicorn[standard]
 
-# data models
-pydantic[dotenv]
-
-# database
-aiopg[sa]
-
-# other
-tenacity
+pydantic

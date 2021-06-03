@@ -19,10 +19,7 @@ def read_reqs( reqs_path: Path):
 readme = (current_dir/'README.md').read_text()
 version = (current_dir/"VERSION").read_text().strip()
 
-install_requirements = read_reqs( current_dir / "requirements" / "_base.txt" ) + [
-    'simcore-postgres-database'
-]
-
+install_requirements = read_reqs( current_dir / "requirements" / "_base.txt" )
 test_requirements = read_reqs( current_dir / "requirements" / "_test.txt" )
 
 
@@ -49,10 +46,5 @@ setup(
     tests_require=test_requirements,
     extras_require= {
         'test': test_requirements
-    },
-    entry_points={
-        'console_scripts': [
-            "{{ cookiecutter.command_line_interface_bin_name }}={{ cookiecutter.package_name }}.__main__:main",
-        ],
     },
 )

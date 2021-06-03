@@ -3,11 +3,11 @@
 # A comma-separated list of package or module names from where C extensions may
 # be loaded. Extensions are loading into the active Python interpreter and may
 # run arbitrary code
-extension-pkg-whitelist=
+extension-pkg-whitelist=pydantic,orjson
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS
+ignore=CVS,migration
 
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.
@@ -18,7 +18,7 @@ ignore-patterns=
 #init-hook=
 
 # Use multiple processes to speed up Pylint.
-jobs=1
+jobs=4
 
 # List of plugins (as comma separated values of python modules names) to load,
 # usually to register additional checkers.
@@ -134,8 +134,7 @@ disable=print-statement,
         too-many-locals,
         C,
         fixme,
-        import-error
-
+        import-error,
 
 
 # Enable the message, report, category or checker with the given id(s). You can
@@ -512,7 +511,8 @@ known-third-party=enchant
 [DESIGN]
 
 # Maximum number of arguments for function / method
-max-args=5
+# NOTE: due to dependency injection, this number can be quite high
+max-args=10
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=7
@@ -521,7 +521,7 @@ max-attributes=7
 max-bool-expr=5
 
 # Maximum number of branch for function / method body
-max-branches=12
+max-branches=13
 
 # Maximum number of locals for function / method body
 max-locals=15

@@ -25,7 +25,6 @@ def test_project_tree(cookies):
     assert result.project.isdir()
 
 
-# TODO: use pylint via package instead of application entrypoint
 def test_run_pylint(cookies, pylintrc):
     result = cookies.bake(
         extra_context={
@@ -55,6 +54,7 @@ def test_no_tags(cookies):
         # skips
         dirs[:] = [n for n in dirs if not n.startswith(".")]
 
+@pytest.mark.skip("TODO: Under development")
 
 def test_run_tests(cookies):
     result = cookies.bake(extra_context={"project_slug": "dummy-project"})
@@ -62,14 +62,14 @@ def test_run_tests(cookies):
     commands = (
         "ls -la .",
         "pip install pip-tools",
-        "make requirements",
+        "cd requirements; make reqs; cd ..",
         "make install-ci",
-        "make test",
+        "make test-ci",
     )
     with inside_dir(working_dir):
         for cmd in commands:
             logger.info("Running '%s' ...", cmd)
-            assert subprocess.check_call(cmd.split()) == 0
+            assert subprocess.check_call(cmd.split(), shell=True) == 0
             logger.info("Done '%s' .", cmd)
 
 
