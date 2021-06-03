@@ -6,22 +6,13 @@
 #   pip install -r requirements/dev.txt
 #
 
-# installs base + tests requirements
+# installs base + tests + tools requirements
+-r _base.txt
 -r _test.txt
+-r _tools.txt
 
 # installs this repo's packages
--e ../../packages/postgres-database/[migration]
--e ../../packages/pytest-simcore/
+-e ../../packages/pytest-simcore
 
 # installs current package
 -e .
-
-# basic dev tools
-
-## NOTE: Copied from ../../../requirements.txt to avoid mounting
-#        basedir in docker during devel-mode.
-#  TODO: Better solution needed!
-black
-pip-tools
-bump2version
-rope
