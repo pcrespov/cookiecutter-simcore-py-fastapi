@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 import os
 
-from utils import download_latest_simcore_at
+from tests.utils import download_latest_simcore_at
 
 current_dir = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
 
