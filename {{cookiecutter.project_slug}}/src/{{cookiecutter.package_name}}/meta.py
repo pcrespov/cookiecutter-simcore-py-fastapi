@@ -5,7 +5,7 @@ from contextlib import suppress
 
 import pkg_resources
 
-current_distribution = pkg_resources.get_distribution("simcore_service_api_server")
+current_distribution = pkg_resources.get_distribution("{{ cookiecutter.package_name }}")
 
 __version__ = current_distribution.version
 api_version: str = __version__

@@ -84,14 +84,14 @@ RUN pip --no-cache-dir install -r _base.txt
 # This stage is for production only dependencies that get partially wiped out afterwards (final docker image concerns)
 #
 #  + /build
-#    + services/{{ cookiecutter.project_slug }}  [scu:scu] WORKDIR
+#    + services/{{ cookiecutter.project_slug }} [scu:scu] WORKDIR
 #
 FROM build as prod-only-deps
 
 ENV SC_BUILD_TARGET prod-only-deps
 
 COPY --chown=scu:scu packages /build/packages
-COPY --chown=scu:scu services/{{ cookiecutter.project_slug }}  /build/services/{{ cookiecutter.project_slug }}
+COPY --chown=scu:scu services/{{ cookiecutter.project_slug }} /build/services/{{ cookiecutter.project_slug }}
 
 WORKDIR /build/services/{{ cookiecutter.project_slug }}
 
@@ -104,7 +104,7 @@ RUN pip3 --no-cache-dir install -r requirements/prod.txt \
 # Runs as scu (non-root user)
 #
 #  + /home/scu     $HOME = WORKDIR
-#    + services/{{ cookiecutter.project_slug }}  [scu:scu]
+#    + services/{{ cookiecutter.project_slug }} [scu:scu]
 #
 FROM base as production
 
@@ -119,18 +119,18 @@ WORKDIR /home/scu
 COPY --chown=scu:scu --from=prod-only-deps  ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Copies booting scripts
-COPY --chown=scu:scu services/{{ cookiecutter.project_slug }} /docker services/{{ cookiecutter.project_slug }} /docker
-RUN chmod +x services/{{ cookiecutter.project_slug }} /docker/*.sh
+COPY --chown=scu:scu services/{{ cookiecutter.project_slug }}/docker services/{{ cookiecutter.project_slug }}/docker
+RUN chmod +x services/{{ cookiecutter.project_slug }}/docker/*.sh
 
 
 HEALTHCHECK --interval=30s \
   --timeout=20s \
   --start-period=30s \
   --retries=3 \
-  CMD ["python3", "services/{{ cookiecutter.project_slug }} /docker/healthcheck.py", "http://localhost:8000/"]
+  CMD ["python3", "services/{{ cookiecutter.project_slug }}/docker/healthcheck.py", "http://localhost:8000/"]
 
-ENTRYPOINT [ "/bin/sh", "services/{{ cookiecutter.project_slug }} /docker/entrypoint.sh" ]
-CMD ["/bin/sh", "services/{{ cookiecutter.project_slug }} /docker/boot.sh"]
+ENTRYPOINT [ "/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/entrypoint.sh" ]
+CMD ["/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/boot.sh"]
 
 
 # --------------------------Development stage -------------------
@@ -150,5 +150,5 @@ WORKDIR /devel
 
 RUN chown -R scu:scu "${VIRTUAL_ENV}"
 
-ENTRYPOINT ["/bin/sh", "services/{{ cookiecutter.project_slug }} /docker/entrypoint.sh"]
-CMD ["/bin/sh", "services/{{ cookiecutter.project_slug }} /docker/boot.sh"]
+ENTRYPOINT ["/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/entrypoint.sh"]
+CMD ["/bin/sh", "services/{{ cookiecutter.project_slug }}/docker/boot.sh"]

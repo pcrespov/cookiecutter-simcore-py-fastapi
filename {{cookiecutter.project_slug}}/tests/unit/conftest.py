@@ -10,7 +10,7 @@ import pytest
 import {{ cookiecutter.package_name }}
 
 
-pytest_plugins = ["pytest_simcore.environs"]
+pytest_plugins = ["pytest_simcore.repository_paths"]
 
 
 @pytest.fixture(scope="session")

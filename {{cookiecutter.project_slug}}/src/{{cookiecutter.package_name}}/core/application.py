@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def create_app(settings: Optional[AppSettings] = None) -> FastAPI:
     if settings is None:
-        settings = AppSettings.create_default()
+        settings = AppSettings()
 
     logging.basicConfig(level=settings.loglevel)
     logging.root.setLevel(settings.loglevel)

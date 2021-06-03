@@ -4,4 +4,7 @@
 # NOTE: ALL version constraints MUST be commented
 -c ../../../requirements/constraints.txt
 
-fastapi[all]
+fastapi
+uvicorn[standard]
+
+pydantic

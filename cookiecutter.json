@@ -9,6 +9,8 @@
     "package_name": "simcore_service_{{ cookiecutter.project_slug|replace('-','_') }}",
     "distribution_name": "simcore-service-{{ cookiecutter.project_slug }}",
 
+    "detailed_doc": "n",
+
     "year": "{% now 'utc', '%Y' %}",
     "version": "0.1.0-alpha",
     "_extensions": ["jinja2_time.TimeExtension"]
