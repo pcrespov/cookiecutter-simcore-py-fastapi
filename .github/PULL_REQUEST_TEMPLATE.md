@@ -1,4 +1,12 @@
-<!--  **WIP-** prefix in title if still work in progress -->
+<!--  **WIP-** prefix in title if still work in progress
+Consider prefix your PR message with an emoticon
+  🐛 bugfix
+  ✨ new feature
+  🔨 refactoring
+  🏗️ maintenance
+  📚 documentation
+
+-->
 
 ## What do these changes do?
 

@@ -1,7 +1,7 @@
 # Cookiecutter simcore-py-fastapi
 
-[![Build Status](https://travis-ci.com/pcrespov/cookiecutter-simcore-py-fastapi.svg?branch=master)](https://travis-ci.com/pcrespov/cookiecutter-simcore-py-fastapi)
-[![Requirements Status](https://requires.io/github/pcrespov/cookiecutter-simcore-py-fastapi/requirements.svg?branch=master)](https://requires.io/github/pcrespov/cookiecutter-simcore-py-fastapi?branch=master)
+<!-- [![Build Status](https://travis-ci.com/pcrespov/cookiecutter-simcore-py-fastapi.svg?branch=master)](https://travis-ci.com/pcrespov/cookiecutter-simcore-py-fastapi)
+[![Requirements Status](https://requires.io/github/pcrespov/cookiecutter-simcore-py-fastapi/requirements.svg?branch=master)](https://requires.io/github/pcrespov/cookiecutter-simcore-py-fastapi?branch=master) -->
 [![license](https://img.shields.io/github/license/pcrespov/cookiecutter-simcore-py-fastapi)](LICENSE)
 
 Cookiecutter template for [osparc-simcore]'s services based in [fastapi].
