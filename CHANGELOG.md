@@ -4,6 +4,9 @@ These are the most notable changes in the generated service
 
 ## [Unreleased]
 
+- New settings layout
+
+## [1.1.0] - 2021-06-13
 - minimal setup
 
 ## [1.0.0] - 2020-07-10
