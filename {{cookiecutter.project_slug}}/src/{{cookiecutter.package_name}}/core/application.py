@@ -6,18 +6,18 @@ from fastapi import FastAPI
 from ..meta import api_version, api_vtag
 from ..api.module_setup import setup_api
 
-from .settings import AppSettings
+from .settings import Settings
 
 
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Optional[AppSettings] = None) -> FastAPI:
+def create_app(settings: Optional[Settings] = None) -> FastAPI:
     if settings is None:
-        settings = AppSettings()
+        settings = Settings.create_from_envs()
 
-    logging.basicConfig(level=settings.loglevel)
-    logging.root.setLevel(settings.loglevel)
+    logging.basicConfig(level=settings.log_level)
+    logging.root.setLevel(settings.log_level)
 
     app = FastAPI(
         debug=settings.debug,

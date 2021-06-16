@@ -1,38 +1,31 @@
-import logging
-from enum import Enum
+{% set package_prefix = cookiecutter.project_slug.upper() -%}
+
 from typing import Optional
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field
 
-class BootModeEnum(str, Enum):
-    debug = "debug-ptvsd"
-    production = "production"
-    development = "development"
-
+from models_library.settings.base import BaseCustomSettings
+from models_library.settings.postgres import PostgresSettings
+from models_library.basic_types import LogLevel, BootModeEnum, BuildTargetEnum
 
 
-class AppSettings(BaseSettings):
-
+class Settings(BaseCustomSettings):
     # DOCKER
-    boot_mode: Optional[BootModeEnum] = Field(..., env="SC_BOOT_MODE")
+    SC_BOOT_MODE: Optional[BootModeEnum]
+    SC_BOOT_TARGET: Optional[BuildTargetEnum]
 
-    # LOGGING
-    log_level_name: str = Field("DEBUG", env="LOG_LEVEL")
 
-    @validator("log_level_name")
+    {{ package_prefix }}_LOG_LEVEL: LogLevel = Field(
+        LogLevel.INFO, env=["{{ package_prefix }}_LOGLEVEL", "LOG_LEVEL", "LOGLEVEL"]
+    )
+
+    {{ package_prefix }}_POSTGRES: PostgresSettings
+
     @classmethod
-    def match_logging_level(cls, value) -> str:
-        try:
-            getattr(logging, value.upper())
-        except AttributeError as err:
-            raise ValueError(f"{value.upper()} is not a valid level") from err
-        return value.upper()
-
-    @property
-    def loglevel(self) -> int:
-        return getattr(logging, self.log_level_name)
-
-    class Config:
-        case_sensitive = False
-        env_file = ".env"  {% if cookiecutter.detailed_doc %}# SEE https://pydantic-docs.helpmanual.io/usage/settings/#dotenv-env-support
-        {%- endif %}
+    def create_from_envs(cls) -> "Settings":
+        cls.set_defaults_with_default_constructors(
+            [
+                ("{{ package_prefix }}_POSTGRES", PostgresSettings),
+            ]
+        )
+        return cls()
