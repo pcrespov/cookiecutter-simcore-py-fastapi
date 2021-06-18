@@ -68,4 +68,4 @@ if __name__ == "__main__":
     format_title_in_readme()
 
     print("[POST] Running black")
-    subprocess.run("black .".split(), cwd=project_dir, check=True)
+    subprocess.run(["black", "."], cwd=project_dir, check=True)
