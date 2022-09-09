@@ -4,26 +4,30 @@
 from contextlib import suppress
 
 import pkg_resources
+from typing import Final
 
-current_distribution = pkg_resources.get_distribution("{{ cookiecutter.package_name }}")
+_current_distribution = pkg_resources.get_distribution(
+    "{{ cookiecutter.package_name }}"
+)
 
-__version__ = current_distribution.version
-api_version: str = __version__
-major, minor, patch = __version__.split(".")
-api_vtag: str = f"v{major}"
+PROJECT_NAME: Final[str] = _current_distribution.project_name
 
-project_name: str = current_distribution.project_name
+API_VERSION: Final[str] = _current_distribution.version
+MAJOR, MINOR, PATCH = _current_distribution.version.split(".")
+API_VTAG: Final[str] = f"v{MAJOR}"
+
+__version__: Final[str] = API_VERSION
 
 
 def get_summary() -> str:
     with suppress(Exception):
         try:
-            metadata = current_distribution.get_metadata_lines("METADATA")
+            metadata = _current_distribution.get_metadata_lines("METADATA")
         except FileNotFoundError:
-            metadata = current_distribution.get_metadata_lines("PKG-INFO")
+            metadata = _current_distribution.get_metadata_lines("PKG-INFO")
 
         return next(x.split(":") for x in metadata if x.startswith("Summary:"))[-1]
     return ""
 
 
-summary: str = get_summary()
+SUMMARY: Final[str] = get_summary()
