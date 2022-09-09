@@ -15,13 +15,9 @@
 [image-commit]:https://images.microbadger.com/badges/commit/itisfoundation/{{ cookiecutter.project_slug }}.svg
 <!------------------------->
 
-## Development
-
-Setup environment
+To develop this project, just
 
 ```cmd
-make devenv
-source .venv/bin/activate
-cd services/api-service
-make install-dev
+make help
+
 ```
