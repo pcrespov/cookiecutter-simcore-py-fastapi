@@ -3,7 +3,7 @@ from typing import Optional
 
 from fastapi import FastAPI
 
-from ..meta import api_version, api_vtag
+from .._meta import api_version, api_vtag
 from ..api.module_setup import setup_api
 
 from .settings import Settings
@@ -31,7 +31,6 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
     logger.debug(settings)
     app.state.settings = settings
-
 
     setup_api(app)
 

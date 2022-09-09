@@ -2,7 +2,7 @@
     api app module
 """
 from fastapi import APIRouter, FastAPI
-from ..meta import api_vtag
+from .._meta import api_vtag
 
 
 def setup_api(app: FastAPI):
