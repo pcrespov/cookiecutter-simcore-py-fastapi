@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 import re
 import sys
 from pathlib import Path
@@ -57,7 +58,7 @@ SETUP = dict(
     extras_require={"test": TEST_REQUIREMENTS},
     entry_points={
         "console_scripts": [
-            "{{ cookicutter.distribution_name }} = {{ cookiecutter.package_name }}.cli:main",
+            "{{ cookiecutter.distribution_name }} = {{ cookiecutter.package_name }}.cli:main",
         ],
     },
 )
