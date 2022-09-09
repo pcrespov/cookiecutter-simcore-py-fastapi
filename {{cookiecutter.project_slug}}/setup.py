@@ -6,45 +6,61 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-if sys.version_info.major != 3 and sys.version_info.minor != 6:
-    raise RuntimeError("Expected ~=3.6, got %s. Did you forget to activate virtualenv?" % str(sys.version_info))
 
-current_dir = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
-
-
-def read_reqs( reqs_path: Path):
-    return re.findall(r'(^[^#-][\w]+[-~>=<.\w]+)', reqs_path.read_text(), re.MULTILINE)
-
-
-readme = (current_dir/'README.md').read_text()
-version = (current_dir/"VERSION").read_text().strip()
-
-install_requirements = read_reqs( current_dir / "requirements" / "_base.txt" )
-test_requirements = read_reqs( current_dir / "requirements" / "_test.txt" )
+def read_reqs(reqs_path: Path) -> set[str]:
+    return {
+        r
+        for r in re.findall(
+            r"(^[^#\n-][\w\[,\]]+[-~>=<.\w]*)",
+            reqs_path.read_text(),
+            re.MULTILINE,
+        )
+        if isinstance(r, str)
+    }
 
 
-setup(
-    name="{{ cookiecutter.distribution_name }}",
-    version=version,
-    author="{{ '{full_name} ({github_username})'.format(**cookiecutter) }}",
-    description={{ '{0!r}'.format(cookiecutter.project_short_description).lstrip('ub') }},
-    classifiers=[
-        'Development Status :: 1 - Planning',
-        'License :: OSI Approved :: MIT License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3.6',
-    ],
-    long_description=readme,
+CURRENT_DIR = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
+
+NAME = "simcore-service-api-server"
+VERSION = (CURRENT_DIR / "VERSION").read_text().strip()
+AUTHORS = ("{{ '{full_name} ({github_username})'.format(**cookiecutter) }}",)
+DESCRIPTION = ({{"{0!r}".format(cookiecutter.project_short_description).lstrip("ub")}},)
+README = (CURRENT_DIR / "README.md").read_text()
+
+PROD_REQUIREMENTS = tuple(
+    read_reqs(CURRENT_DIR / "requirements" / "_base.txt")
+    | {
+        "simcore-models-library",
+        "simcore-service-library[fastapi]",
+        "simcore-settings-library",
+    }
+)
+
+TEST_REQUIREMENTS = tuple(read_reqs(CURRENT_DIR / "requirements" / "_test.txt"))
+
+SETUP = dict(
+    name=NAME,
+    version=VERSION,
+    author=AUTHORS,
+    description=DESCRIPTION,
+    long_description=README,
     license="MIT license",
-    python_requires='~=3.6',
-    packages=find_packages(where='src'),
+    python_requires="~=3.9",
+    packages=find_packages(where="src"),
     package_dir={
-        '': 'src',
+        "": "src",
     },
-    install_requires= install_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
-    extras_require= {
-        'test': test_requirements
+    include_package_data=True,
+    install_requires=PROD_REQUIREMENTS,
+    test_suite="tests",
+    tests_require=TEST_REQUIREMENTS,
+    extras_require={"test": TEST_REQUIREMENTS},
+    entry_points={
+        "console_scripts": [
+            "{{ cookicutter.distribution_name }} = {{ cookiecutter.package_name }}.cli:main",
+        ],
     },
 )
+
+if __name__ == "__main__":
+    setup(**SETUP)
