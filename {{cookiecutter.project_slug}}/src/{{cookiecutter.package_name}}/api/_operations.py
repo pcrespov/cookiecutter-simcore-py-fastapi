@@ -1,12 +1,13 @@
 """
-All entrypoints used for operations, for insteance
+All entrypoints used for operations, for instance
 service health-check, diagnostics, debugging, status, etc
 """
 
-from fastapi import APIRouter, FastAPI
+from datetime import datetime
 
+from fastapi import APIRouter
 from fastapi.responses import PlainTextResponse
-import datetime
+
 
 router = APIRouter()
 

@@ -22,10 +22,10 @@ def read_reqs(reqs_path: Path) -> set[str]:
 
 CURRENT_DIR = Path(sys.argv[0] if __name__ == "__main__" else __file__).resolve().parent
 
-NAME = "simcore-service-api-server"
+NAME = "{{ cookiecutter.distribution_name }}"
 VERSION = (CURRENT_DIR / "VERSION").read_text().strip()
 AUTHORS = ("{{ '{full_name} ({github_username})'.format(**cookiecutter) }}",)
-DESCRIPTION = ({{"{0!r}".format(cookiecutter.project_short_description).lstrip("ub")}},)
+DESCRIPTION = {{"{0!r}".format(cookiecutter.project_short_description).lstrip("ub")}}
 README = (CURRENT_DIR / "README.md").read_text()
 
 PROD_REQUIREMENTS = tuple(
