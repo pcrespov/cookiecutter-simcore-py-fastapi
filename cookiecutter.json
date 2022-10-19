@@ -1,17 +1,15 @@
 {
-    "full_name": "Your name",
-    "github_username": "Your github username",
-
-    "project_name": "Name of the project",
-    "project_short_description": "A short description of the project",
-    "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
-
-    "package_name": "simcore_service_{{ cookiecutter.project_slug|replace('-','_') }}",
-    "distribution_name": "simcore-service-{{ cookiecutter.project_slug }}",
-
-    "detailed_doc": "n",
-
-    "year": "{% now 'utc', '%Y' %}",
-    "version": "0.1.0-alpha",
-    "_extensions": ["jinja2_time.TimeExtension"]
+  "full_name": "Your name",
+  "github_username": "Your github username",
+  "project_name": "Name of the project",
+  "project_short_description": "A short description of the project",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
+  "package_name": "simcore_service_{{ cookiecutter.project_slug|replace('-','_') }}",
+  "distribution_name": "{{ cookiecutter.package_name|replace('_','-') }}",
+  "detailed_doc": "n",
+  "year": "{% now 'utc', '%Y' %}",
+  "version": "0.1.0-alpha",
+  "_extensions": [
+    "jinja2_time.TimeExtension"
+  ]
 }

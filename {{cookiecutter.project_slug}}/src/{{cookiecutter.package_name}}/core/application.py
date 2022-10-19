@@ -1,38 +1,31 @@
 import logging
-from typing import Optional
-
 from fastapi import FastAPI
 
-from ..meta import api_version, api_vtag
-from ..api.module_setup import setup_api
+from .._meta import API_VERSION, API_VTAG, PROJECT_NAME
+from ..api.routes import setup_api_routes
 
-from .settings import Settings
+from .settings import ApplicationSettings
 
 
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Optional[Settings] = None) -> FastAPI:
-    if settings is None:
-        settings = Settings.create_from_envs()
+def create_app(settings: ApplicationSettings) -> FastAPI:
 
-    logging.basicConfig(level=settings.log_level)
-    logging.root.setLevel(settings.log_level)
+    logger.debug("app settings: %s", settings.json(indent=1))
 
     app = FastAPI(
         debug=settings.debug,
-        title="Components Catalog Service",
-        description="Manages and maintains a **catalog** of all published components (e.g. macro-algorithms, scripts, etc)",
-        version=api_version,
-        openapi_url=f"/api/{api_vtag}/openapi.json",
+        title=PROJECT_NAME,
+        description="{{ cookiecutter.project_short_description }}",
+        version=API_VERSION,
+        openapi_url=f"/api/{API_VTAG}/openapi.json",
         docs_url="/dev/doc",
         redoc_url=None,  # default disabled
     )
 
-    logger.debug(settings)
     app.state.settings = settings
 
-
-    setup_api(app)
+    setup_api_routes(app)
 
     return app

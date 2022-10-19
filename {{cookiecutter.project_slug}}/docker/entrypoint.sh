@@ -20,7 +20,6 @@ echo "$INFO" "User : $(id scu)"
 echo "$INFO" "python : $(command -v python)"
 echo "$INFO" "pip : $(command -v pip)"
 
-
 #
 # DEVELOPMENT MODE
 # - expects docker run ... -v $(pwd):$SC_DEVEL_MOUNT

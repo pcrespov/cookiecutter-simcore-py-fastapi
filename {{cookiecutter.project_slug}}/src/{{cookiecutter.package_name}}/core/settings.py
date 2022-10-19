@@ -2,30 +2,43 @@
 
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, PositiveInt
 
 from models_library.settings.base import BaseCustomSettings
-from models_library.settings.postgres import PostgresSettings
-from models_library.basic_types import LogLevel, BootModeEnum, BuildTargetEnum
+from models_library.basic_types import LogLevel, BootModeEnum, BuildTargetEnum, VersionTag
+from settings_library.utils_logging import MixinLoggingSettings
 
 
-class Settings(BaseCustomSettings):
-    # DOCKER
-    SC_BOOT_MODE: Optional[BootModeEnum]
-    SC_BOOT_TARGET: Optional[BuildTargetEnum]
+class ApplicationSettings(BaseCustomSettings, MixinLoggingSettings):
+    # CODE STATICS ---------------------------------------------------------
+    API_VERSION: str = API_VERSION
+    APP_NAME: str = APP_NAME
+    API_VTAG: VersionTag = API_VTAG
+
+    # IMAGE BUILDTIME ------------------------------------------------------
+    # @Makefile
+    SC_BUILD_DATE: Optional[str] = None
+    SC_BUILD_TARGET: Optional[BuildTargetEnum] = None
+    SC_VCS_REF: Optional[str] = None
+    SC_VCS_URL: Optional[str] = None
 
 
-    {{ package_prefix }}_LOG_LEVEL: LogLevel = Field(
+    # @Dockerfile
+    SC_BOOT_MODE: Optional[BootModeEnum] = None
+    SC_BOOT_TARGET: Optional[BuildTargetEnum] = None
+    SC_HEALTHCHECK_TIMEOUT: Optional[PositiveInt] = Field(
+        None,
+        description="If a single run of the check takes longer than timeout seconds "
+        "then the check is considered to have failed."
+        "It takes retries consecutive failures of the health check for the container to be considered unhealthy.",
+    )
+    SC_USER_ID: Optional[int] = None
+    SC_USER_NAME: Optional[str] = None
+
+
+    # RUNTIME  -----------------------------------------------------------
+
+
+    {{ package_prefix }}_LOGLEVEL: LogLevel = Field(
         LogLevel.INFO, env=["{{ package_prefix }}_LOGLEVEL", "LOG_LEVEL", "LOGLEVEL"]
     )
-
-    {{ package_prefix }}_POSTGRES: PostgresSettings
-
-    @classmethod
-    def create_from_envs(cls) -> "Settings":
-        cls.set_defaults_with_default_constructors(
-            [
-                ("{{ package_prefix }}_POSTGRES", PostgresSettings),
-            ]
-        )
-        return cls()
